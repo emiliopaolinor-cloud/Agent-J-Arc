@@ -597,16 +597,23 @@ document.getElementById('copy-ca').addEventListener('click', () => {
         body: JSON.stringify({ messages: history.slice(-10) })
       });
 
-      if (!res.ok) throw new Error('bad_response');
-      const data = await res.json();
-      const reply = data.reply || 'Signal dropped. Try again in a moment.';
+      let data = null;
+      try { data = await res.json(); } catch (parseErr) { data = null; }
 
       typingEl.remove();
+
+      if (!res.ok) {
+        const errMsg = (data && data.reply) ? data.reply : ('Signal interference (HTTP ' + res.status + ') — couldn\'t process that.');
+        addMessage('agent', errMsg);
+        return;
+      }
+
+      const reply = (data && data.reply) || 'Signal dropped. Try again in a moment.';
       addMessage('agent', reply);
       history.push({ role: 'assistant', content: reply });
     } catch (err){
       typingEl.remove();
-      addMessage('agent', 'Signal interference — couldn\'t process that. Try again.');
+      addMessage('agent', 'Connection lost — couldn\'t reach the uplink. Check your connection and try again.');
     } finally {
       input.disabled = false;
       sendBtn.disabled = false;
