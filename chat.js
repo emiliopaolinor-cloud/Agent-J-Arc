@@ -82,7 +82,7 @@ exports.handler = async (event) => {
       console.error('Anthropic API error:', response.status, errText);
       return {
         statusCode: 502,
-        body: JSON.stringify({ error: 'upstream_error', reply: 'Signal to the model dropped. Try again.' })
+        body: JSON.stringify({ error: 'upstream_error', reply: 'Signal to the model dropped (Anthropic API returned ' + response.status + '). Check the function logs in Netlify for details.' })
       };
     }
 
